@@ -1,42 +1,43 @@
-// audio.js
 export class EchoAudio {
-  constructor() {
+  constructor(){
     this.ctx = null;
-    this.masterGain = null;
+    this.master = null;
     this.muted = false;
-    this.latencyComp = 0.02; // seconds; slight lead to align with UI glow
+    this.volume = 0.9;
+    this.latencyComp = 0.02; // UI-audio sync lead
+    this.padFreq = [330, 392, 466, 554]; // musical-ish steps
   }
-  async init() {
+  async init(){
     if (this.ctx) return;
-    this.ctx = new (window.AudioContext || window.webkitAudioContext)({latencyHint: 'interactive'});
-    this.masterGain = this.ctx.createGain();
-    this.masterGain.connect(this.ctx.destination);
-    this.masterGain.gain.value = 0.9;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)({latencyHint:'interactive'});
+    this.master = this.ctx.createGain();
+    this.master.gain.value = this.muted ? 0 : this.volume;
+    this.master.connect(this.ctx.destination);
+  }
+  setVolume(v){
+    this.volume = v;
+    if (this.master) this.master.gain.value = this.muted ? 0 : v;
   }
   setMuted(flag){
     this.muted = flag;
-    if (!this.masterGain) return;
-    this.masterGain.gain.value = flag ? 0 : 0.9;
+    if (this.master) this.master.gain.value = flag ? 0 : this.volume;
   }
-  // Play a short percussive blip, pitch mapped per padIndex 0..3
-  playHit(when, padIndex){
-    if(!this.ctx) return;
-    const f = [320, 380, 450, 520][padIndex % 4];
+  blip(when, index){
+    if (!this.ctx) return;
     const o = this.ctx.createOscillator();
     const g = this.ctx.createGain();
     o.type = 'triangle';
-    o.frequency.setValueAtTime(f, when);
-    g.gain.setValueAtTime(0.001, when);
-    g.gain.exponentialRampToValueAtTime(0.5, when + 0.005);
-    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.14);
-    o.connect(g).connect(this.masterGain);
+    o.frequency.setValueAtTime(this.padFreq[index % this.padFreq.length], when);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.exponentialRampToValueAtTime(0.55, when + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.16);
+    o.connect(g).connect(this.master);
     o.start(when);
-    o.stop(when + 0.16);
+    o.stop(when + 0.2);
   }
-  // schedule a sequence [{pad, timeOffset}]
-  scheduleSequence(startTime, seq){
-    seq.forEach(step=>{
-      this.playHit(startTime + step.timeOffset - this.latencyComp, step.pad);
-    });
+  schedule(startTime, steps){ // steps: [{pad, offset}]
+    for (const s of steps){
+      this.blip(startTime + s.offset - this.latencyComp, s.pad);
+    }
   }
 }
