@@ -2,56 +2,137 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0f17" />
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
+  />
+  <meta name="theme-color" content="#0a0f18" />
   <title>EchoTap</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="assets/icon-192.png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <div class="safe">
-    <header class="topbar">
-      <h1>EchoTap</h1>
-      <div class="controls">
-        <button id="mute" aria-pressed="false" aria-label="Toggle sound">🔊</button>
-        <button id="help" aria-label="How to play">?</button>
+  <div id="app" class="safe">
+    <header class="topbar" role="banner">
+      <div class="brand">
+        <img src="assets/logo.svg" alt="" aria-hidden="true" />
+        <strong>EchoTap</strong>
+      </div>
+      <div class="actions">
+        <button id="btn-settings" class="icon" aria-label="Settings" title="Settings">⚙️</button>
+        <button id="btn-help" class="icon" aria-label="How to play" title="How to play">❓</button>
+        <button id="btn-mute" class="icon" aria-pressed="false" aria-label="Toggle sound">🔊</button>
       </div>
     </header>
 
-    <main>
-      <div class="board">
-        <canvas id="fx" width="800" height="800" aria-hidden="true"></canvas>
-        <div class="pad" id="pad-0" data-pad="0" aria-label="Pad 1"></div>
-        <div class="pad" id="pad-1" data-pad="1" aria-label="Pad 2"></div>
-        <div class="pad" id="pad-2" data-pad="2" aria-label="Pad 3"></div>
-        <div class="pad" id="pad-3" data-pad="3" aria-label="Pad 4"></div>
-        <div class="center">
-          <button id="start" class="primary">Start</button>
-          <div class="status">
+    <main id="game" role="main">
+      <!-- Game board -->
+      <section class="board" aria-label="Game board">
+        <canvas id="fx" width="1200" height="1200" aria-hidden="true"></canvas>
+
+        <!-- Pads -->
+        <button class="pad" id="pad-0" data-pad="0" aria-label="Pad 1"></button>
+        <button class="pad" id="pad-1" data-pad="1" aria-label="Pad 2"></button>
+        <button class="pad" id="pad-2" data-pad="2" aria-label="Pad 3"></button>
+        <button class="pad" id="pad-3" data-pad="3" aria-label="Pad 4"></button>
+
+        <!-- Center HUD -->
+        <div class="hud">
+          <div class="status-pill" id="status-pill" aria-live="polite" aria-atomic="true"></div>
+          <div class="score">
             <div>Round <span id="round">0</span></div>
             <div>Best <span id="best">0</span></div>
           </div>
         </div>
-      </div>
 
-      <section class="toolbar">
-        <button id="mode-classic" class="chip selected">Classic</button>
-        <button id="mode-zen" class="chip">Zen</button>
-        <button id="mode-speed" class="chip">Speedrun</button>
-        <button id="share" class="chip">Share</button>
+        <!-- Tap shield (locks input during playback) -->
+        <div id="shield" class="shield" aria-hidden="true"></div>
+
+        <!-- Start overlay -->
+        <div id="start-overlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="title">
+          <div class="card">
+            <h1 id="title">EchoTap</h1>
+            <p class="tagline">Watch. Listen. Echo the beat.</p>
+            <div class="mode-row" role="group" aria-label="Game mode">
+              <button id="mode-classic" class="chip selected">Classic</button>
+              <button id="mode-zen" class="chip">Zen</button>
+              <button id="mode-speed" class="chip">Speedrun</button>
+            </div>
+            <button id="btn-start" class="primary">Start</button>
+            <p class="hint">Pro tip: headphones improve timing.</p>
+          </div>
+        </div>
+
+        <!-- Countdown -->
+        <div id="countdown" class="countdown" aria-hidden="true"></div>
       </section>
+
+      <!-- Toolbar -->
+      <section class="toolbar">
+        <button id="btn-share" class="chip">Share</button>
+        <button id="btn-restart" class="chip">Restart</button>
+        <button id="btn-theme" class="chip">Theme</button>
+      </section>
+
+      <!-- Captions -->
+      <div id="captions" class="captions" aria-live="polite"></div>
     </main>
 
-    <dialog id="howto">
-      <h2>How to play</h2>
-      <p>Watch the pattern. Tap the pads to repeat it. Each round adds one note.</p>
-      <p>Tip: wear headphones for crisp timing.</p>
-      <form method="dialog"><button>Got it</button></form>
-    </dialog>
+    <footer class="foot">
+      <small>Web App. Add to Home Screen for the best experience.</small>
+    </footer>
   </div>
+
+  <!-- Settings modal -->
+  <dialog id="settings" aria-labelledby="settings-title">
+    <form method="dialog" class="sheet">
+      <h2 id="settings-title">Settings</h2>
+
+      <label class="row">
+        <span>Volume</span>
+        <input id="set-volume" type="range" min="0" max="1" step="0.01" value="0.9" />
+      </label>
+
+      <label class="row">
+        <span>Haptics</span>
+        <input id="set-haptics" type="checkbox" checked />
+      </label>
+
+      <label class="row">
+        <span>High contrast</span>
+        <input id="set-contrast" type="checkbox" />
+      </label>
+
+      <label class="row">
+        <span>Reduce motion</span>
+        <input id="set-reduced" type="checkbox" />
+      </label>
+
+      <menu>
+        <button value="cancel">Close</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- How-to modal -->
+  <dialog id="howto" aria-labelledby="howto-title">
+    <form method="dialog" class="sheet">
+      <h2 id="howto-title">How to play</h2>
+      <ol>
+        <li>Watch and listen to the pattern.</li>
+        <li>Tap the pads to repeat it.</li>
+        <li>Each round adds one note. Miss once and Classic ends; Zen never ends.</li>
+      </ol>
+      <p>Captions appear under the board (can be disabled by turning volume to 0).</p>
+      <menu>
+        <button>Got it</button>
+      </menu>
+    </form>
+  </dialog>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
