@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f17" />
+  <title>EchoTap</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>
+<body>
+  <div class="safe">
+    <header class="topbar">
+      <h1>EchoTap</h1>
+      <div class="controls">
+        <button id="mute" aria-pressed="false" aria-label="Toggle sound">🔊</button>
+        <button id="help" aria-label="How to play">?</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="board">
+        <canvas id="fx" width="800" height="800" aria-hidden="true"></canvas>
+        <div class="pad" id="pad-0" data-pad="0" aria-label="Pad 1"></div>
+        <div class="pad" id="pad-1" data-pad="1" aria-label="Pad 2"></div>
+        <div class="pad" id="pad-2" data-pad="2" aria-label="Pad 3"></div>
+        <div class="pad" id="pad-3" data-pad="3" aria-label="Pad 4"></div>
+        <div class="center">
+          <button id="start" class="primary">Start</button>
+          <div class="status">
+            <div>Round <span id="round">0</span></div>
+            <div>Best <span id="best">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <section class="toolbar">
+        <button id="mode-classic" class="chip selected">Classic</button>
+        <button id="mode-zen" class="chip">Zen</button>
+        <button id="mode-speed" class="chip">Speedrun</button>
+        <button id="share" class="chip">Share</button>
+      </section>
+    </main>
+
+    <dialog id="howto">
+      <h2>How to play</h2>
+      <p>Watch the pattern. Tap the pads to repeat it. Each round adds one note.</p>
+      <p>Tip: wear headphones for crisp timing.</p>
+      <form method="dialog"><button>Got it</button></form>
+    </dialog>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
